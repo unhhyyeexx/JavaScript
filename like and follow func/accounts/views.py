@@ -6,6 +6,7 @@ from django.contrib.auth.forms import (
     AuthenticationForm, 
     PasswordChangeForm,
 )
+from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods, require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
@@ -118,8 +119,16 @@ def follow(request, user_pk):
         if user != person:
             if person.followers.filter(pk=user.pk).exists():
                 person.followers.remove(user)
+                followed = False
             else:
                 person.followers.add(user)
-        return redirect('accounts:profile', person.username)
+                followed = True
+            context = {
+                'followed' : followed,
+                'follower_cnt' : person.followers.count(),
+                'following_cnt' : person.followings.count(),
+            }
+        return JsonResponse(context)
     return redirect('accounts:login')
+
 

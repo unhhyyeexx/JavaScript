@@ -1,4 +1,6 @@
+from multiprocessing import context
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods, require_POST, require_safe
 from .models import Article, Comment
@@ -104,10 +106,16 @@ def likes(request, article_pk):
     if request.user.is_authenticated:
         article = get_object_or_404(Article, pk=article_pk)
         if article.like_users.filter(pk=request.user.pk).exists():
-                article.like_users.remove(request.user)
+            article.like_users.remove(request.user)
+            liked = False
         else:
             article.like_users.add(request.user)
-        if request.GET.get('next'):
-            return redirect(request.GET.get('next'))
-        return redirect('articles:index')
+            liked = True
+        context = {
+            'liked' : liked,
+            'like_cnt' : article.like_users.count()
+        }
+        # if request.GET.get('next'):
+        #     return redirect(request.GET.get('next'))
+        return JsonResponse(context)
     return redirect('accounts:login')
