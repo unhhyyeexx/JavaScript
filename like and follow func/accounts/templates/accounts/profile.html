@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex justify-content-between mt-3">
+  {% with followers=person.followers.all followings=person.followings.all %}
+  <div class="d-flex">
+    <h1>{{ person.username }}</h1>
+    {% if user != person %}
+    <form action="{% url 'accounts:follow' person.pk %}" method="POST">
+      {% csrf_token %}
+      {% if user in followers %}
+        <button type="button" class="btn btn-light mx-2 mt-1" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+          Following
+        </button>
+        <!-- Modal -->
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-body">
+                Unfollow {{ person.username }} ?
+              </div>
+              <div class="modal-footer">
+                <button type="btn" class="btn btn-secondary" data-bs-dismiss="modal">Cancle</button>
+                <button type="btn" class="btn btn-primary">Unfollow</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <input type="submit" value="Follow" class="btn btn-primary mx-2 mt-1">
+      {% endif %}
+    </form>
+    {% endif %}
+    {% if user == person %}
+      <a href="{% url 'articles:create' %}" class="mt-2 mx-3 text-muted">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        </svg>
+      </a>
+    {% endif %}
+  </div>  
+    <div class="d-flex justify-content-end">
+      <div style="display:inline;" class="text-center mx-4">{{ person.article_set.all|length }}<br>
+        Posts
+      </div>
+      <div style="display:inline;" class="text-center mx-2">{{ followers|length }} <br>
+        Followers
+      </div>
+      <div style="display:inline" class="text-center mx-2">{{ followings|length }} <br>
+        Following
+      </div>
+    </div>
+  {% endwith %}
+</div>
+
+<hr>
+
+<div class="container">
+  {% for article in person.article_set.all %}
+    <a href="{% url 'articles:detail' article.pk %}" style="text-decoration:none">
+      <div class="card mb-3" style="width:auto;">
+        <div class="card-header">
+          <h3 class="text-muted">{{ article.user }}</h3>
+        </div>
+        <div class="card-body">
+          <h4 class="card-title text-black">{{ article.title }}</h4>
+          <p class="card-text text-black">{{ article.content }}</p>
+        </div>
+          <div>
+            <form action="{% url 'articles:likes' article.pk %}?next=/accounts/{{person.username}}" method="POST">
+              {% csrf_token %}
+              {% if user in article.like_users.all %}
+                <div class="d-flex justify-content-start align-items-center">
+                  <button class="btn" sytle="background-color: transparent;">
+                    <i class="fa-solid fa-heart" style="color:red;"></i>
+                  </button>
+                  <p class="my-auto text-black">{{ article.like_users.all | length }} likes</p>
+                </div>
+      
+              {% else %}
+              <div class="d-flex justify-content-start align-items-center">
+                <button class="btn" sytle="opacity:0; padding:0;">
+                  <i class="fa-regular fa-heart" ></i>
+                </button>
+                {% if article.like_users.all %}
+                  <p class="my-auto text-black" >{{ article.like_users.all | length }} likes</p>  
+                {% endif %}
+              </div>
+              {% endif %} 
+              
+            </form>
+          </div>
+      </div>
+    </a>
+    {% endfor %}
+</div>
+  
+
+
+{% endblock content %}
