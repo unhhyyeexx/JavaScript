@@ -113,7 +113,7 @@ def likes(request, article_pk):
             liked = True
         context = {
             'liked' : liked,
-            'like_cnt' : article.like_users.count()
+            'like_cnt' : article.like_users.count(),
         }
         # if request.GET.get('next'):
         #     return redirect(request.GET.get('next'))

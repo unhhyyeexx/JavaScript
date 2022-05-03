@@ -96,7 +96,7 @@
               {% if user in article.like_users.all %}
                 <div class="d-flex justify-content-start align-items-center">
                   <button class="btn" sytle="background-color: transparent;" id="like-{{article.pk}}">
-                    <i class="fa-solid fa-heart" style="color:red;"></i>
+                    <i id="icon" class="fa-solid fa-heart" style="color:red;"></i>
                   </button>
                   <p class="my-auto text-black" id="x-{{article.pk}}">{{ article.like_users.count }} likes</p>
                 </div>
@@ -104,10 +104,12 @@
               {% else %}
                 <div class="d-flex justify-content-start align-items-center">
                   <button class="btn" sytle="opacity:0; padding:0;" id="like-{{article.pk}}">
-                    <i class="fa-regular fa-heart" ></i>
+                    <i id="icon" class="fa-regular fa-heart" ></i>
                   </button>
                   {% if article.like_users.all %}
-                    <p class="my-auto text-black" id="x-{{article.pk}}">{{ article.like_users.count }} likes</p>  
+                    <p class="my-auto text-black" id="x-{{article.pk}}">{{ article.like_users.count }} likes</p>
+                  {% else %}
+                    <p class="my-auto text-black" id="x-{{article.pk}}"> </p> 
                   {% endif %}
                 </div>
               {% endif %} 
@@ -137,19 +139,25 @@
           const liked = res.data.liked
           const likedCnt = res.data.like_cnt
           console.log(likedCnt)
-          console.log(res)
 
-          const cntlike = document.querySelector(`#x-${articlePk}`)
-          cntlike.innerText = `${likedCnt} likes`
+          if(likedCnt > 0){
+            const cntlike = document.querySelector(`#x-${articlePk}`)
+            cntlike.innerText = `${likedCnt} likes`
+          } else {
+            const cntlike = document.querySelector(`#x-${articlePk}`)
+            cntlike.innerText = ``
+          }
 
           const button = document.querySelector(`#like-${articlePk}`)
+          const icon = document.querySelector('#icon')
           if (liked === true) {
             button.setAttribute('style', "background-color: transparent;")
-            button.firstChild.setAttribute('class', "fa-solid fa-heart")
-            button.firstChild.setAttribute('style', "color:red;")
+            icon.setAttribute('class', "fa-solid fa-heart")
+            icon.setAttribute('style', "color:red;")
           } else {
-            button.setAttribute('style', "opacity:0; padding:0;")
-            button.firstChild.setAttribute('class', "fa-regular fa-heart")
+            button.setAttribute('style', "background-color: transparent;")
+            icon.setAttribute('class', "fa-regular fa-heart")
+            icon.setAttribute('style', 'color:black;')
           }
         })
       })

@@ -26,29 +26,76 @@
       <p class="card-text">{{ article.content }}</p>
     </div>
       <div>
-        <form action="{% url 'articles:likes' article.pk %}" method="POST">
-          {% csrf_token %}
+        <form class="like-form" data-article-pk="{{article.pk}}" data-user-name="{{person.username}} ">
           {% if user in article.like_users.all %}
             <div class="d-flex justify-content-start align-items-center">
-              <button class="btn" sytle="background-color: transparent;">
-                <i class="fa-solid fa-heart" style="color:red;"></i>
+              <button class="btn" sytle="background-color: transparent;" id="like-{{article.pk}}">
+                <i id="icon" class="fa-solid fa-heart" style="color:red;"></i>
               </button>
-              <p class="my-auto">{{ article.like_users.all | length }} likes</p>
+              <p class="my-auto text-black" id="x-{{article.pk}}">{{ article.like_users.count }} likes</p>
             </div>
   
           {% else %}
-          <div class="d-flex justify-content-start align-items-center">
-            <button class="btn" sytle="opacity:0; padding:0;">
-              <i class="fa-regular fa-heart" ></i>
-            </button>
-            {% if article.like_users.all %}
-              <p class="my-auto">{{ article.like_users.all | length }} likes</p>  
-            {% endif %}
-          </div>
+            <div class="d-flex justify-content-start align-items-center">
+              <button class="btn" sytle="opacity:0; padding:0;" id="like-{{article.pk}}">
+                <i id="icon" class="fa-regular fa-heart" ></i>
+              </button>
+              {% if article.like_users.all %}
+                <p class="my-auto text-black" id="x-{{article.pk}}">{{ article.like_users.count }} likes</p>
+              {% else %}
+                <p class="my-auto text-black" id="x-{{article.pk}}"> </p> 
+              {% endif %}
+            </div>
           {% endif %} 
-          
         </form>
       </div>
   </div>
   {% endfor %}
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value
+    const forms = document.querySelectorAll('.like-form')
+    forms.forEach(form => {
+      form.addEventListener('submit', event => {
+        event.preventDefault()
+        const articlePk = event.target.dataset.articlePk
+        console.log(articlePk)
+        const userName = event.target.dataset.userName
+        console.log(userName)
+        axios({
+          method : 'post',
+          url : `/articles/${articlePk}/likes/`,
+          headers : {
+            'X-CSRFToken' : csrf_token
+          }
+        })
+        .then(res => {
+          const liked = res.data.liked
+          const likedCnt = res.data.like_cnt
+          console.log(likedCnt)
+
+          if(likedCnt > 0){
+            const cntlike = document.querySelector(`#x-${articlePk}`)
+            cntlike.innerText = `${likedCnt} likes`
+          } else {
+            const cntlike = document.querySelector(`#x-${articlePk}`)
+            cntlike.innerText = ``
+          }
+
+          const button = document.querySelector(`#like-${articlePk}`)
+          const icon = document.querySelector('#icon')
+          if (liked === true) {
+            button.setAttribute('style', "background-color: transparent;")
+            icon.setAttribute('class', "fa-solid fa-heart")
+            icon.setAttribute('style', "color:red;")
+          } else {
+            button.setAttribute('style', "background-color: transparent;")
+            icon.setAttribute('class', "fa-regular fa-heart")
+            icon.setAttribute('style', 'color:black;')
+          }
+        })
+      })
+    })
+  </script>
 {% endblock content %}
